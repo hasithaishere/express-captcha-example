@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup Form</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Sign Up</h2>
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+            </div>
+            <div class="form-group">
+                <div class="g-recaptcha" data-sitekey="<RECAPTCHA_SITE_KEY>"></div>
+            </div>
+            <button type="submit">Sign Up</button>
+            <div id="message"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const recaptchaToken = grecaptcha.getResponse();
+            if (!recaptchaToken) {
+                document.getElementById('message').innerHTML = 
+                    '<p class="error">Please complete the captcha</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value,
+                        recaptchaToken
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('message').innerHTML = 
+                        '<p style="color: green;">Signup successful!</p>';
+                    document.getElementById('signupForm').reset();
+                    grecaptcha.reset();
+                } else {
+                    document.getElementById('message').innerHTML = 
+                        `<p class="error">${data.error}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('message').innerHTML = 
+                    '<p class="error">An error occurred. Please try again.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
