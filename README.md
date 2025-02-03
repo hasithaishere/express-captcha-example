@@ -1,11 +1,12 @@
-# Express reCAPTCHA Example
+# Express CAPTCHA Example
 
-A simple example showing how to integrate Google reCAPTCHA v2 with a Vue.js frontend and Express.js backend.
+A simple example showing how to integrate both Google reCAPTCHA v2 and Cloudflare Turnstile with an Express.js backend.
 
 ## Features
 
-- Vue.js frontend with a signup form
+- Simple HTML frontend with signup forms
 - Google reCAPTCHA v2 integration
+- Cloudflare Turnstile integration 
 - Express.js backend API
 - Form validation and error handling
 - Clean and responsive UI
@@ -14,6 +15,7 @@ A simple example showing how to integrate Google reCAPTCHA v2 with a Vue.js fron
 
 - Node.js and npm installed
 - A Google reCAPTCHA site key and secret key
+- A Cloudflare Turnstile site key and secret key
 
 ## Setup
 

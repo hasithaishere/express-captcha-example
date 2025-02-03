@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Turnstile Example</title>
+    <!-- Include Turnstile script -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+    <form id="demo-form" action="/submit" method="POST">
+        <input type="email" name="email" placeholder="Enter your email">
+        
+        <!-- Turnstile widget will be inserted here -->
+        <div class="cf-turnstile" 
+             data-sitekey="<TURNSTILE_SITE_KEY>"
+             data-callback="onSuccess"
+             data-theme="light"></div>
+        
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        // Callback when challenge is completed successfully
+        function onSuccess(token) {
+            // You can access the token with: token
+            console.log('Challenge completed');
+        }
+
+        document.getElementById('demo-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const token = formData.get('cf-turnstile-response');
+            
+            try {
+                const response = await fetch('/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: formData.get('email'),
+                        token: token
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('Verification successful!');
+                } else {
+                    alert('Verification failed!');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
