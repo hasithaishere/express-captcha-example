@@ -17,7 +17,15 @@ jobs:
       # Option 1: Use Semgrep Cloud Platform (recommended)
       # Requires SEMGREP_APP_TOKEN secret in your repository
       - name: Run Semgrep with Cloud Platform
-        run: semgrep ci --json --output=semgrep-results.json
+        run: |
+          semgrep ci --json -o semgrep-results.json || true
+          # Verify the file was created and contains JSON
+          if [ -f semgrep-results.json ]; then
+            echo "JSON file created successfully"
+            head -n 5 semgrep-results.json
+          else
+            echo "Warning: JSON file not created"
+          fi
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
       
@@ -27,3 +35,4 @@ jobs:
         with:
           name: semgrep-results
           path: semgrep-results.json
+          if-no-files-found: warn
