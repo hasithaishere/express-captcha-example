@@ -1,0 +1,174 @@
+openapi: 3.0.0
+info:
+  version: '2.0'
+  title: Comment
+  description: Utilize the Comment API to create a comment in a workspace.
+  license:
+    name: MIT
+servers:
+  - url: 'https://api.respond.io/v2'
+paths:
+  '/contact/{identifier}/comment':
+    post:
+      summary: Create a comment
+      description: Adds a comment to the specific contact for internal reference.
+      operationId: createComment
+      parameters:
+        - $ref: '#/components/parameters/identifier'
+        - $ref: '#/components/parameters/identifier'
+      requestBody:
+        description: 'You can mention other users using `{{@user.ID}}` in the comment where `ID` is the user ID.'
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  maxLength: 1000
+                  example: A comment via the API
+              required:
+                - text
+            examples:
+              Simple Comment:
+                value:
+                  text: This is a comment
+              Mention User:
+                value:
+                  text: 'Please look into this contact {{@user.1}}'
+              Dynamic Variable in Comment:
+                value:
+                  text: 'Comment about {{$contact.name}}'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contactId:
+                    type: integer
+                    description: ID of the contact for which the comment was added.
+                  text:
+                    type: string
+                    description: Text of the comment.
+                    example: You just commented from the API
+                  created_at:
+                    type: integer
+                    description: Unix timestamps in seconds representing the time at which the comment was added.
+                    example: 1662979868
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Comment length must not be greater than 1000 characters
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  message:
+                    type: string
+                    example: UN_AUTHORIZED
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: Contact not found
+        '429':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 429
+                  message:
+                    type: string
+                    example: Too Many Requests
+          headers:
+            Retry-After:
+              schema:
+                type: number
+                example: 1
+              description: Number of seconds until you can retry the request
+            X-RateLimit-Limit:
+              schema:
+                type: number
+                example: 10
+              description: Number of request allowed for this end point
+            X-RateLimit-Remaining:
+              schema:
+                type: number
+                example: 5
+              description: Number of request remaining for this end point
+        '449':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 449
+                  message:
+                    type: string
+                    example: Your request cannot be processed at the moment as it is currently in queue. Please try again in a few minutes.
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: Unexpected error occurred
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+components:
+  parameters:
+    identifier:
+      name: identifier
+      in: path
+      description: 'Identifier of the contact that can either be a phone number, email or contact ID. Examples: ``id:123`` , ``email:abdc@gmail.com`` , ``phone:+60121233112``'
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - BearerAuth: []

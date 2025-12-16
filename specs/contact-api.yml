@@ -1,0 +1,1035 @@
+openapi: 3.0.0
+info:
+  version: '2.0'
+  title: Contact
+  description: 'Utilize the Contact API suite to effortlessly access, create, update, or remove your contacts, in addition to merging and listing all available contacts.'
+  license:
+    name: ''
+servers:
+  - url: 'https://api.respond.io/v2'
+paths:
+  '/contact/{identifier}':
+    get:
+      tags:
+        - Contact
+      summary: Get a contact
+      description: Retrieves the information of an existing contact.
+      operationId: getContact
+      parameters:
+        - $ref: '#/components/parameters/identifier'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+    post:
+      tags:
+        - Contact
+      summary: Create a contact
+      description: 'Creates a new contact. It is highly recommended to add a delay before executing a new action after creating a new contact, as processing time is required.'
+      operationId: createContact
+      parameters:
+        - $ref: '#/components/parameters/identifier-without-id'
+      requestBody:
+        $ref: '#/components/requestBodies/Create-A-Contact'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: '200'
+                  message:
+                    type: string
+                    example: Contact added successfully!
+                required:
+                  - code
+                  - message
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+    put:
+      tags:
+        - Contact
+      summary: Update a contact
+      description: "Updates an existing contact. Only the contact fields that are included in the body will be updated. The\_first\_contact will be updated when duplicate contacts with the defined identifier exist."
+      operationId: updateContact
+      parameters:
+        - $ref: '#/components/parameters/identifier'
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactFields'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '449':
+          $ref: '#/components/responses/449'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+    delete:
+      tags:
+        - Contact
+      summary: Delete a contact
+      description: Deletes an existing contact.
+      operationId: deleteContact
+      parameters:
+        - $ref: '#/components/parameters/identifier'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  '/contact/create_or_update/{identifier}':
+    post:
+      tags:
+        - Contact
+      summary: Create or update a contact
+      description: |-
+        Creates or updates a contact.
+
+        If your request does not include contact ID and the identifiers (phone/email) in the request body do not belong to a person, your request creates a contact. If a contact already exists with the identifier in the request path, your request updates that contact (first Contact that matches).
+
+        It is highly recommended to add a delay before executing a new action after creating a new contact, as processing time is required.
+      operationId: createOrUpdateContact
+      parameters:
+        - $ref: '#/components/parameters/identifier'
+      requestBody:
+        $ref: '#/components/requestBodies/Create-or-Update-Contact'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '449':
+          $ref: '#/components/responses/449'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  /contact/merge:
+    post:
+      tags:
+        - Contact
+      summary: Merge two contacts
+      description: Merge two contacts by their IDs
+      operationId: mergeContacts
+      requestBody:
+        description: The contact that is older becomes the "primary contact".
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    contactIds:
+                      type: array
+                      description: IDs of the two contacts that are to be merged
+                      uniqueItems: true
+                      items:
+                        type: integer
+                - $ref: '#/components/schemas/ContactFields'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  /contact/list:
+    post:
+      tags:
+        - Contact
+      summary: List the contacts
+      description: List all available contacts. You can use filters in the request body to limit the results to only records with matching contact field values.
+      operationId: listContacts
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursorId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactFilter'
+            examples:
+              All Contact(s):
+                value:
+                  search: ''
+                  filter:
+                    $and: []
+                  timezone: Asia/Kuala_Lumpur
+              Contact(s) that unassigned:
+                value:
+                  search: ''
+                  filter:
+                    $and:
+                      - category: contactField
+                        field: assigneeUserId
+                        operator: isEqualTo
+                        value: null
+                  timezone: Asia/Kuala_Lumpur
+              Contact(s) that assigned to specific user:
+                value:
+                  search: ''
+                  filter:
+                    $and:
+                      - category: contactField
+                        field: assigneeUserId
+                        operator: isEqualTo
+                        value: User Id
+                  timezone: Asia/Kuala_Lumpur
+              Contact(s) with Tag:
+                value:
+                  search: ''
+                  filter:
+                    $and:
+                      - category: contactTag
+                        field: null
+                        operator: hasAnyOf
+                        value:
+                          - B
+                  timezone: Asia/Kuala_Lumpur
+              Contact with matching email:
+                value:
+                  search: john@gmail.com
+                  filter:
+                    $and: []
+                  timezone: Asia/Kuala_Lumpur
+              Contact(s) with matching Lifecycle:
+                value:
+                  search: ''
+                  filter:
+                    $and:
+                      - category: lifecycle
+                        field: null
+                        operator: isEqualTo
+                        value: New Lead
+                  timezone: Asia/Kuala_Lumpur
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Contact'
+                  pagination:
+                    type: object
+                    properties:
+                      next:
+                        type: string
+                        example: 'https://api.respond.io/contact/list?limit=10&cursorId=-10'
+                      previous:
+                        type: string
+                        example: 'https://api.respond.io/contact/list?limit=10&cursorId=-10'
+                    required:
+                      - next
+                      - previous
+                required:
+                  - items
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  '/contact/{identifier}/tag':
+    post:
+      tags:
+        - Contact Tags
+      summary: Add tags
+      description: Adds tags for a specific contact.
+      operationId: addTags
+      parameters:
+        - $ref: '#/components/parameters/identifier'
+      requestBody:
+        $ref: '#/components/requestBodies/Add-Remove-tag'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '449':
+          $ref: '#/components/responses/449'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+    delete:
+      tags:
+        - Contact Tags
+      summary: Delete tags
+      description: Deletes tags for a specific contact.
+      operationId: deleteTags
+      parameters:
+        - name: identify
+          in: query
+          allowEmptyValue: true
+          allowReserved: true
+          style: form
+          schema:
+            type: string
+            pattern: asd
+        - $ref: '#/components/parameters/identifier'
+      requestBody:
+        $ref: '#/components/requestBodies/Add-Remove-tag'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '449':
+          $ref: '#/components/responses/449'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  '/contact/{identifier}/channels':
+    get:
+      tags:
+        - Contact Channel
+      summary: List contact channels
+      description: List all connected channel of a specific contact.
+      operationId: listChannels
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursorId'
+        - $ref: '#/components/parameters/identifier'
+        - $ref: '#/components/parameters/identifier'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContactChannel'
+                  pagination:
+                    type: object
+                    properties:
+                      next:
+                        type: string
+                        example: 'https://api.respond.io/contact/{identifier}/channels?limit=10&cursorId=10'
+                      previous:
+                        type: string
+                        example: 'https://api.respond.io/contact/{identifier}/channels?limit=10&cursorId=-10'
+                    required:
+                      - next
+                      - previous
+                required:
+                  - items
+                  - pagination
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  '/contact/{identifier}/lifecycle/update':
+    post:
+      tags:
+        - Contact Lifecycle
+      summary: Update contact lifecycle
+      description: ''
+      operationId: post-contact-identifier-lifecycle-update
+      parameters:
+        - $ref: '#/components/parameters/identifier'
+        - $ref: '#/components/parameters/identifier'
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: true
+                  description: Updating lifecycle stage to empty value will remove lifecycle stage from a contact
+              required:
+                - name
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: number
+                    example: 200
+                  message:
+                    type: string
+                    default: Contact lifecycle stage updated successfully!
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+components:
+  parameters:
+    limit:
+      name: limit
+      in: query
+      description: Number of contacts to return i.e. page size.
+      required: false
+      allowEmptyValue: true
+      schema:
+        type: integer
+        minimum: 1
+        exclusiveMaximum: true
+        maximum: 100
+        default: 10
+    cursorId:
+      name: cursorId
+      in: query
+      description: Pointer to the contact `id` from where the next batch of records should start from.
+      required: false
+      schema:
+        type: integer
+    identifier:
+      name: identifier
+      in: path
+      description: 'Identifier of the contact that can either be a phone number, email or contact ID. Examples: ``id:123`` , ``email:abdc@gmail.com`` , ``phone:+60121233112``'
+      required: true
+      schema:
+        type: string
+    identifier-without-id:
+      name: identifier
+      in: path
+      description: 'Identifier of the contact that can either be a phone number, email or contact ID. Examples: ``email:abdc@gmail.com`` , ``phone:+60121233112``'
+      required: true
+      schema:
+        type: string
+  requestBodies:
+    Create-or-Update-Contact:
+      description: ''
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContactFields'
+    Add-Remove-tag:
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: array
+            description: Array of tags to be added to the contact
+            minItems: 1
+            maxItems: 10
+            uniqueItems: true
+            items:
+              type: string
+              maxLength: 255
+              example: sales
+          examples:
+            Tags:
+              value:
+                - abc
+    List-contacts:
+      description: |
+        | Fields  | Supported Operators |
+        | ------------- | ------------- |
+        | firstName  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` |
+        | lastName  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` |
+        | phone  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` |
+        | email  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` |
+        | countryCode  | `exists` `doesNotExist` |
+        | lang  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` |
+        | status  | `exists` `doesNotExist` |
+        | assigneeUserId  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` |
+        | custom_field_email  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` |
+        | custom_field_text  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` |
+        | custom_field_url  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` |
+        | custom_field_time  | `isTimestampAfter` `isTimestampBefore` `isTimestampBetween` `exists` `doesNotExist` |
+        | custom_field_date  | `isTimestampAfter` `isTimestampBefore` `isTimestampBetween` `exists` `doesNotExist` |
+        | custom_field_number  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` `isGreatorThan` `isLessThan` `isBetween` |
+        | custom_field_checkbox  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` |
+        | custom_field_list  | `isEqualTo` `isNotEqualTo` `exists` `doesNotExist` |
+        | createdAt  | `isTimestampAfter` `isTimestampBefore` `isTimestampBetween` |
+        | contactTag  | `hasAnyOf` `hasAllOf` `hasNoneOf` |
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContactFilter'
+          examples:
+            Contact assigned to specific user:
+              value:
+                search: ''
+                filter:
+                  $and:
+                    - category: contactField
+                      field: assigneeUserId
+                      operator: isEqualTo
+                      value: Your user Id here
+                timezone: Asia/Kuala_Lumpur
+                pagination:
+                  page: 1
+                  sortBy: fullName
+                  descending: false
+                  rowsPerPage: 25
+                type: mine
+            All contacts:
+              value:
+                search: ''
+                filter:
+                  $and: []
+                timezone: Asia/Kuala_Lumpur
+                pagination:
+                  page: 1
+                  sortBy: fullName
+                  descending: false
+                  rowsPerPage: 25
+                type: all
+            Unassigned contacts:
+              value:
+                search: ''
+                filter:
+                  $and:
+                    - category: contactField
+                      field: assigneeUserId
+                      operator: isEqualTo
+                      value: null
+                timezone: Asia/Kuala_Lumpur
+                pagination:
+                  page: 1
+                  sortBy: fullName
+                  descending: false
+                  rowsPerPage: 25
+                type: unassigned
+    Merge-a-contact:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - type: object
+                properties:
+                  contactIds:
+                    type: array
+                    minItems: 2
+                    maxItems: 2
+                    items:
+                      type: integer
+              - $ref: '#/components/schemas/ContactFields'
+    Create-A-Contact:
+      content:
+        application/json:
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/components/schemas/ContactFields'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  responses:
+    '200':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              contactId:
+                type: integer
+                description: ID of the contact on which the action was performed.
+    '400':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 400
+              message:
+                type: string
+                example: Validation error.
+    '401':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 401
+              message:
+                type: string
+                example: UN_AUTHORIZED
+    '404':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: Contact not found
+    '429':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 429
+              message:
+                type: string
+                example: Too Many Requests
+      headers:
+        Retry-After:
+          schema:
+            type: number
+            example: 1
+          description: Number of seconds until you can retry the request
+        X-RateLimit-Limit:
+          schema:
+            type: number
+            example: 10
+          description: Number of request allowed for this end point
+        X-RateLimit-Remaining:
+          schema:
+            type: number
+            example: 5
+          description: Number of request remaining for this end point
+    '449':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 449
+              message:
+                type: string
+                example: Your request cannot be processed at the moment as it is currently in queue. Please try again in a few minutes.
+        application/xml:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 449
+              message:
+                type: string
+                example: Your request cannot be processed at the moment as it is currently in queue. Please try again in a few minutes.
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 449
+              message:
+                type: string
+                example: Your request cannot be processed at the moment as it is currently in queue. Please try again in a few minutes.
+    '500':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 500
+              message:
+                type: string
+                example: Unexpected error occurred
+  schemas:
+    Contact:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: integer
+              description: Contact ID
+              example: 12345
+        - $ref: '#/components/schemas/ContactFields'
+        - type: object
+          properties:
+            status:
+              type: string
+              enum:
+                - open
+                - close
+              description: Conversation status of the contact
+              example: open
+        - type: object
+          properties:
+            tags:
+              type: array
+              maxItems: 10
+              uniqueItems: true
+              items:
+                type: string
+                minLength: 1
+                example: 'new_customer, sales'
+          minProperties: 1
+        - type: object
+          nullable: true
+          properties:
+            assignee:
+              $ref: '#/components/schemas/User'
+        - type: object
+          nullable: true
+          properties:
+            lifecycle:
+              type: string
+              nullable: true
+              example: Hot Lead
+        - type: object
+          properties:
+            created_at:
+              type: integer
+              description: |
+                Unix timestamp in seconds representing when the contact was created.
+              example: 1663274081
+    ContactFields:
+      type: object
+      anyOf:
+        - type: object
+          properties:
+            firstName:
+              type: string
+              example: 'Muhammad '
+            lastName:
+              type: string
+              nullable: true
+              example: Mahin
+            phone:
+              type: string
+              nullable: true
+              example: '+60123456789'
+            email:
+              type: string
+              nullable: true
+              example: test@example.com
+            language:
+              type: string
+              nullable: true
+              description: 'Following the [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) standard.'
+              example: ms
+            profilePic:
+              type: string
+              nullable: true
+              example: 'https://cdn.respond.io/profile_avatar.png'
+            countryCode:
+              type: string
+              nullable: true
+              description: 'Following the [ISO 3166-1 alpha-2](https://www.wikiwand.com/en/ISO_3166-1_alpha-2) standard.'
+              example: MY
+            custom_fields:
+              type: array
+              nullable: true
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: Company Website
+                  value:
+                    type: string
+                    nullable: true
+                    description: |-
+                      Formatting rules
+
+                      - Text: "string" (use quotation marks for the string value)
+                      - Number: Number (without any quotation marks)
+                      - Email: "email" (format: user@domain.com)
+                      - URL: "url" (format: www.website.com, https://www.website.com, website.com, http://website.com)
+                      - List: "string" (the string value must match one of the list options)
+                      - Date: "yyyy-mm-dd" (must follow this format)
+                      - Time: "HH:MM" (must follow 24H format, 1PM => 13:00)
+                      - Checkbox: "true/false" (must be true for checked, false for unchecked)
+                    example: 'https://example.com'
+                required:
+                  - name
+          required:
+            - firstName
+    User:
+      type: object
+      title: User
+      description: User to whom the contact is assigned
+      properties:
+        id:
+          type: integer
+          description: User ID
+          example: 12345
+        firstName:
+          type: string
+          example: Muhammad Mahin
+        lastName:
+          type: string
+          example: Dar
+        email:
+          type: string
+          format: email
+          example: test@example.com
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+    ContactFilter:
+      type: object
+      properties:
+        search:
+          type: string
+        timezone:
+          type: string
+          example: Asia/Kuala_Lumpur
+        filter:
+          type: object
+          oneOf:
+            - type: object
+              title: $and
+              properties:
+                $and:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      category:
+                        type: string
+                        enum:
+                          - contactField
+                          - contactTag
+                          - lifecycle
+                      field:
+                        type: string
+                      operator:
+                        type: string
+                        enum:
+                          - isEqualTo
+                          - isNotEqualTo
+                          - isTimestampAfter
+                          - isTimestampBefore
+                          - isTimestampBetween
+                          - exists
+                          - doesNotExist
+                          - isGreaterThan
+                          - isLessThan
+                          - isBetween
+                          - hasAnyOf
+                          - hasAllOf
+                          - hasNoneOf
+                      value:
+                        oneOf:
+                          - type: string
+                          - type: array
+                            items:
+                              type: string
+                          - type: object
+                            properties:
+                              to:
+                                type: string
+                              from:
+                                type: string
+            - type: object
+              title: $or
+              properties:
+                $or:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      category:
+                        type: string
+                        enum:
+                          - contactField
+                      field:
+                        type: string
+                      operator:
+                        type: string
+                        enum:
+                          - isEqualTo
+                          - isNotEqualTo
+                          - isTimestampAfter
+                          - isTimestampBefore
+                          - isTimestampBetween
+                          - exists
+                          - doesNotExist
+                          - isGreaterThan
+                          - isLessThan
+                          - isBetween
+                          - hasAnyOf
+                          - hasAllOf
+                          - hasNoneOf
+                      value:
+                        oneOf:
+                          - type: string
+                          - type: array
+                            items:
+                              type: string
+                          - type: object
+                            properties:
+                              to:
+                                type: string
+                              from:
+                                type: string
+          discriminator:
+            propertyName: pet_type
+    ContactChannel:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Channel ID.
+          minimum: 1
+          example: 12345
+        name:
+          type: string
+          description: Channel name.
+        source:
+          type: string
+          enum:
+            - facebook
+            - instagram
+            - line
+            - telegram
+            - viber
+            - twitter
+            - wechat
+            - custom_channel
+            - gmail
+            - other_email
+            - twillio
+            - message_bird
+            - nexmo
+            - 360dialog_whatsapp
+            - twilio_whatsapp
+            - message_bird_whatsapp
+            - whatsapp
+            - nexmo_whatsapp
+            - whatsapp_cloud
+          description: Type of the channel
+        meta:
+          type: object
+          description: Additional details of the contact as provided by the channel. This will vary across channels.
+        lastMessageTime:
+          type: integer
+          description: Unix timestamp of the last messag received/sent (in seconds).
+        lastIncomingMessageTime:
+          type: integer
+          description: Unix timestamp of the last incoming message (in seconds).
+        created_at:
+          type: integer
+          description: Unix timestamp of the channel creation (in seconds).
+security:
+  - BearerAuth: []
+x-internal: false

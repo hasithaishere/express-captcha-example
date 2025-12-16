@@ -1,0 +1,1042 @@
+openapi: 3.0.0
+info:
+  version: '2.0'
+  title: Messaging
+  description: Utilize the Messaging API suite to retrieve messages sent as well as send messages to contact through channels connected in your workspace.
+  license:
+    name: MIT
+servers:
+  - url: 'https://api.respond.io/v2'
+    description: Production
+paths:
+  '/contact/{identifier}/message':
+    post:
+      summary: Send a message
+      description: 'Sends a message to a specific contact through specific channel. If channelId is not specified, the message will be sent through last interacted channel. Note that for custom payload message type only supported for Telegram, Facebook, Viber and Line, channelId must be specified in order to send a custom payload message. Example for identifier - `id:123` | `email:abdc@gmail.com` | `phone:+60121233112`'
+      operationId: sendMessage
+      parameters:
+        - $ref: '#/components/parameters/identifier'
+        - $ref: '#/components/parameters/identifier'
+      requestBody:
+        description: ''
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                channelId:
+                  type: integer
+                  nullable: true
+                  description: |-
+                    ID of the channel to send the message on.
+
+                    `null` to send message on the **last interacted channel** (if any).
+                message:
+                  oneOf:
+                    - $ref: '#/components/schemas/Text'
+                    - $ref: '#/components/schemas/Attachment'
+                    - $ref: '#/components/schemas/CustomPayload'
+                    - $ref: '#/components/schemas/QuickReply'
+                    - $ref: '#/components/schemas/WhatsAppTemplate'
+                    - $ref: '#/components/schemas/Email'
+              required:
+                - message
+            examples:
+              Simple Text Message:
+                value:
+                  channelId: 0
+                  message:
+                    type: text
+                    text: There has been an update in your account...
+              Text Message with Dynamic Variable:
+                value:
+                  channelId: 0
+                  message:
+                    type: text
+                    text: 'Hello {{$contact.name}}, How can we help you?'
+              Attachement:
+                value:
+                  channelId: 0
+                  message:
+                    type: attachment
+                    attachment:
+                      type: image
+                      url: 'http://example.com/some-file.pdf'
+              Custom Payload:
+                value:
+                  channelId: 0
+                  message:
+                    type: custom_payload
+                    payload: {}
+              Quick Reply:
+                value:
+                  channelId: 0
+                  message:
+                    type: quick_reply
+                    title: Quick reply title
+                    replies:
+                      - How are you?
+              Email:
+                value:
+                  channelId: 0
+                  message:
+                    type: email
+                    text: Example email text
+                    subject: Example email subject
+                    bcc:
+                      - test@example.com
+                    cc:
+                      - test@example.com
+                    replyToMessageId: 1262965213
+                    attachments:
+                      - type: image
+                        url: 'https://cdn.respond.io/johndoe.png'
+                        fileName: filename.png
+              WhatsApp Template:
+                value:
+                  channelId: 0
+                  message:
+                    type: whatsapp_template
+                    template:
+                      name: ordernumber
+                      languageCode: en
+                      components:
+                        - type: header
+                          format: image
+                          parameters:
+                            - type: image
+                              image:
+                                link: 'https://png.pngtree.com/templates/20181023/technology-logo-template-png_37582.jpg'
+                        - type: body
+                          text: 'Hello {{1}}, Thank you for your order. Order Number: {{2}} We''\''''ll let you know when your order is shipped.'
+                          parameters:
+                            - type: text
+                              text: $contact.name
+                            - type: text
+                              text: $contact.name
+                        - type: footer
+                          text: 'AcmeTech Innovations, Inc.'
+              WhatsApp Template with buttons:
+                value:
+                  channelId: 0
+                  message:
+                    type: whatsapp_template
+                    template:
+                      name: product_offer
+                      languageCode: en
+                      components:
+                        - type: header
+                          format: image
+                          parameters:
+                            - type: image
+                              image:
+                                link: 'https://example.com/product-image.jpg'
+                        - type: body
+                          text: 'Hello {{1}}, We have an exciting new product that we think you''ll love! Are you interested?'
+                          parameters:
+                            - type: text
+                              text: John Doe
+                        - type: buttons
+                          buttons:
+                            - type: quick_reply
+                              text: 'Yes, tell me more!'
+                            - type: quick_reply
+                              text: 'Not interested, thanks.'
+                        - type: footer
+                          text: 'ABC Products, Inc.'
+              WhatsApp Template with Location:
+                value:
+                  channelId: 0
+                  message:
+                    type: whatsapp_template
+                    template:
+                      name: test_location_new_template_testing
+                      languageCode: en
+                      components:
+                        - type: header
+                          format: location
+                          parameters:
+                            - type: location
+                              location:
+                                name: name
+                                address: address
+                                latitude: '22.22'
+                                longitude: '22.22'
+                        - type: body
+                          text: |-
+                            Hi {{1}} 
+                            We would like to know the location of our next meetup.
+                            Thanks & Regards
+                             {{2}}
+                          parameters:
+                            - type: text
+                              text: John
+                            - type: text
+                              text: Sarah
+              WhatsApp Product Marketing Template - Full Catalog:
+                value:
+                  channelId: 0
+                  message:
+                    type: whatsapp_template
+                    template:
+                      name: catalog
+                      languageCode: en
+                      components:
+                        - type: body
+                          text: body here
+                        - type: buttons
+                          buttons:
+                            - type: catalog
+                              text: View catalog
+                              parameters:
+                                - type: action
+                                  action:
+                                    thumbnail_product_image_url: image_address
+                                    thumbnail_product_retailer_id: '0'
+              WhatsApp Product Marketing Template - Multi-product Messages:
+                value:
+                  channelId: 0
+                  message:
+                    type: whatsapp_template
+                    template:
+                      name: mpm
+                      languageCode: en
+                      components:
+                        - type: header
+                          format: text
+                          text: header
+                        - type: body
+                          text: body
+                        - type: buttons
+                          buttons:
+                            - type: mpm
+                              text: View items
+                              parameters:
+                                - type: action
+                                  action:
+                                    thumbnail_product_retailer_id: '0'
+                                    thumbnail_product_image_url: image_address
+                                    sections:
+                                      - product_items:
+                                          - product_retailer_id: '1'
+                                            image_url: image_address
+                                            name: Red Shoes (Unisex)
+                                            price: '10.00'
+                                            availability: in stock
+                                            currency: USD
+                                            description: A vibrant red crewneck Shoes for all shapes and sizes. Made from 100% cotton.
+                                          - product_retailer_id: '0'
+                                            image_url: image_address
+                                            name: Blue Shoes (Unisex)
+                                            price: '10.00'
+                                            availability: in stock
+                                            currency: USD
+                                            description: A vibrant blue crewneck Shoes for all shapes and sizes. Made from 100% cotton.
+              WhatsApp Authentication Template Message:
+                value:
+                  channelId: 123456
+                  message:
+                    type: whatsapp_template
+                    template:
+                      name: send_otp
+                      languageCode: en
+                      components:
+                        - text: '*{{1}}* is your verification code.'
+                          type: body
+                          parameters:
+                            - text: '123456'
+                              type: text
+                        - type: buttons
+                          buttons:
+                            - type: url
+                              text: Copy Code
+                              url: 'https://www.whatsapp.com/otp/code/?otp_type=COPY_CODE&code=otp{{1}}'
+                              parameters:
+                                - type: text
+                                  text: '123456'
+              Facebook Messenger Tag Message:
+                value:
+                  channelId: 0
+                  message:
+                    type: text
+                    text: Message text
+                    messageTag: ACCOUNT_UPDATE
+              Whatsapp Template with CTA Button with Dynamic URL:
+                value:
+                  channelId: 0
+                  message:
+                    type: whatsapp_template
+                    template:
+                      name: track_order
+                      languageCode: en
+                      components:
+                        - text: Track your order
+                          type: body
+                        - type: buttons
+                          buttons:
+                            - text: Visit website
+                              type: url
+                              parameters:
+                                - type: text
+                                  text: '23232'
+                              url: 'https://www.test.com/my-en/home/tracking/tracking-global-forwarding.html?submit=1&tracking-id=/{{1}}'
+                              example:
+                                - '23232'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messageId:
+                    type: integer
+                    description: The id of the message so that you can track it later
+                required:
+                  - messageId
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '449':
+          $ref: '#/components/responses/449'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+          description: Production
+  '/contact/{identifier}/message/{messageId}':
+    get:
+      summary: Get a message
+      description: Retrieves a message based on the message ID. You can get the message ID that was returned upon sending through Send a message endpoint.
+      operationId: getMessage
+      parameters:
+        - $ref: '#/components/parameters/identifier'
+        - $ref: '#/components/parameters/identifier'
+        - $ref: '#/components/parameters/messageId'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messageId:
+                    type: integer
+                    description: Unique ID of the message
+                    example: 1262965213
+                  channelMessageId:
+                    oneOf:
+                      - type: string
+                      - type: integer
+                    example: 123
+                  contactId:
+                    type: integer
+                    description: ID of the contact to which the message was sent.
+                    example: 123
+                  channelId:
+                    type: integer
+                    example: 123
+                  traffic:
+                    type: string
+                    enum:
+                      - outgoing
+                      - incoming
+                    description: Defines if the message was received or sent
+                  message:
+                    oneOf:
+                      - $ref: '#/components/schemas/Text'
+                      - $ref: '#/components/schemas/Attachment'
+                      - $ref: '#/components/schemas/WhatsAppTemplate'
+                      - $ref: '#/components/schemas/QuickReply'
+                      - $ref: '#/components/schemas/CustomPayload'
+                  status:
+                    $ref: '#/components/schemas/MessageStatus'
+                required:
+                  - messageId
+                  - contactId
+                  - channelId
+                  - traffic
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '449':
+          $ref: '#/components/responses/449'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+          description: Production
+components:
+  parameters:
+    identifier:
+      name: identifier
+      in: path
+      description: 'Identifier of the contact that can either be a phone number, email or contact ID. Examples: ``id:123`` , ``email:abdc@gmail.com`` , ``phone:+60121233112``'
+      required: true
+      schema:
+        type: string
+    messageId:
+      name: messageId
+      in: path
+      description: '1662965880'
+      required: true
+      schema:
+        type: integer
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  responses:
+    '400':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 400
+              message:
+                type: string
+                example: Validation error.
+    '401':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 401
+              message:
+                type: string
+                example: UN_AUTHORIZED
+    '404':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: Contact not found
+    '429':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 429
+              message:
+                type: string
+                example: Too Many Requests
+      headers:
+        Retry-After:
+          schema:
+            type: number
+            example: 1
+          description: Number of seconds until you can retry the request
+        X-RateLimit-Limit:
+          schema:
+            type: number
+            example: 10
+          description: Number of request allowed for this end point
+        X-RateLimit-Remaining:
+          schema:
+            type: number
+            example: 5
+          description: Number of request remaining for this end point
+    '449':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 449
+              message:
+                type: string
+                example: Your request cannot be processed at the moment as it is currently in queue. Please try again in a few minutes.
+    '500':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 500
+              message:
+                type: string
+                example: Unexpected error occurred
+    Get-a-message:
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              messageId:
+                type: integer
+              channelMessageId:
+                oneOf:
+                  - type: string
+                  - type: integer
+              contactId:
+                type: integer
+              channelId:
+                type: integer
+              traffic:
+                type: string
+                enum:
+                  - outgoing
+                  - incoming
+              message:
+                oneOf:
+                  - $ref: '#/components/schemas/Text'
+                  - $ref: '#/components/schemas/Attachment'
+                  - $ref: '#/components/schemas/WhatsAppTemplate'
+                  - $ref: '#/components/schemas/QuickReply'
+                  - $ref: '#/components/schemas/CustomPayload'
+              status:
+                $ref: '#/components/schemas/MessageStatus'
+            required:
+              - messageId
+              - contactId
+              - channelId
+              - traffic
+  schemas:
+    Text:
+      type: object
+      title: Text
+      properties:
+        type:
+          type: string
+          enum:
+            - text
+        text:
+          type: string
+          example: Message text
+        messageTag:
+          type: string
+          enum:
+            - ACCOUNT_UPDATE
+            - POST_PURCHASE_UPDATE
+            - CONFIRMED_EVENT_UPDATE
+          description: 'Required if the channel is `facebook` or `instagram` and the message is being sent outsde the standard 24 hour messaging window. [Reference](https://developers.facebook.com/docs/messenger-platform/reference/send-api/#parameters)'
+      required:
+        - type
+        - text
+    Attachment:
+      type: object
+      title: Attachment
+      properties:
+        type:
+          type: string
+          enum:
+            - attachment
+        attachment:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - image
+                - video
+                - audio
+                - file
+            url:
+              type: string
+              description: 'Attachments must be hosted on a publicly accessible platform and provided as a URL in the API request. Direct links to files that are not hosted properly may result in delivery issues, even if the API response is successful. Use reputable hosting services like Amazon S3, Google Cloud Storage, or Dropbox. Ensure the URL is publicly accessible and formatted correctly in the payload.'
+              example: 'https://example-bucket.s3.amazonaws.com/sample-image.jpg'
+          required:
+            - type
+            - url
+      required:
+        - type
+        - attachment
+    CustomPayload:
+      type: object
+      title: CustomPayload
+      properties:
+        type:
+          type: string
+          example: custom_payload
+        payload:
+          type: object
+          description: Refer to the channel documentation for the payload.
+      required:
+        - type
+        - payload
+    QuickReply:
+      type: object
+      title: QuickReply
+      properties:
+        type:
+          type: string
+          example: quick_reply
+        title:
+          type: string
+          example: Quick reply title
+        replies:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            example: How are you?
+      required:
+        - type
+        - title
+        - replies
+    WhatsAppTemplate:
+      type: object
+      title: WhatsAppTemplate
+      properties:
+        type:
+          type: string
+          example: whatsapp_template
+        template:
+          type: object
+          properties:
+            name:
+              type: string
+              example: New Update
+            languageCode:
+              type: string
+              description: '[Follows ISO 639-1 standard](https://developers.facebook.com/docs/whatsapp/api/messages/message-templates/#supported-languages)'
+              example: en
+            components:
+              type: array
+              items:
+                anyOf:
+                  - $ref: '#/components/schemas/MTMHeader'
+                  - $ref: '#/components/schemas/MTMBody'
+                  - $ref: '#/components/schemas/MTMFooter'
+                  - $ref: '#/components/schemas/MTMButton'
+          required:
+            - name
+            - languageCode
+      required:
+        - type
+        - template
+    MTMHeader:
+      type: object
+      title: MTMHeader
+      anyOf:
+        - $ref: '#/components/schemas/MTMHeaderText'
+        - $ref: '#/components/schemas/MTMHeaderImage'
+        - $ref: '#/components/schemas/MTMHeaderVideo'
+        - $ref: '#/components/schemas/MTMHeaderDocument'
+    MTMHeaderText:
+      type: object
+      title: MTMHeaderText
+      properties:
+        type:
+          type: string
+          enum:
+            - header
+          example: header
+        format:
+          type: string
+          enum:
+            - text
+          example: text
+        text:
+          type: string
+          example: Header text
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: text
+              text:
+                type: string
+                example: respond.io
+            required:
+              - type
+              - text
+      required:
+        - type
+        - text
+        - parameters
+    MTMHeaderImage:
+      type: object
+      title: MTMHeaderImage
+      properties:
+        type:
+          type: string
+          enum:
+            - header
+          example: header
+        format:
+          type: string
+          enum:
+            - image
+          example: image
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - image
+                example: image
+              image:
+                type: object
+                properties:
+                  link:
+                    type: string
+                    example: 'https://picsum.photos'
+                  caption:
+                    type: string
+                    example: image caption
+                  filename:
+                    type: string
+                    example: image_1024x768.png
+                required:
+                  - link
+                  - caption
+                  - filename
+            required:
+              - type
+              - image
+      required:
+        - parameters
+      x-examples:
+        Example 1:
+          type: header
+          format: image
+          parameters:
+            - type: image
+              image:
+                link: 'https://cdn.chatapi.net'
+                caption: image caption
+                filename: image_1024x768.png
+    MTMHeaderVideo:
+      type: object
+      title: MTMHeaderVideo
+      properties:
+        type:
+          type: string
+          enum:
+            - header
+          example: header
+        format:
+          type: string
+          enum:
+            - video
+          example: video
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - video
+                format: video
+                example: video
+              video:
+                type: object
+                properties:
+                  link:
+                    type: string
+                    example: 'https://cdn.chatapi.net'
+                  caption:
+                    type: string
+                    example: video caption
+                  filename:
+                    type: string
+                    example: video.mp4
+                required:
+                  - link
+                  - caption
+                  - filename
+            required:
+              - type
+              - video
+      required:
+        - parameters
+      x-examples:
+        Example 1:
+          type: header
+          format: video
+          parameters:
+            - type: video
+              video:
+                link: 'https://cdn.chatapi.net'
+                caption: video caption
+                filename: video.mp4
+    MTMHeaderDocument:
+      type: object
+      title: MTMHeaderDocument
+      properties:
+        type:
+          type: string
+          enum:
+            - header
+          example: header
+        format:
+          type: string
+          enum:
+            - document
+          example: document
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - document
+                example: document
+              document:
+                type: object
+                properties:
+                  link:
+                    type: string
+                    format: url
+                    example: 'https://cdn.chatapi.net'
+                  caption:
+                    type: string
+                    example: document caption
+                  filename:
+                    type: string
+                    example: document.pdf
+                required:
+                  - link
+                  - filename
+            required:
+              - type
+              - document
+      required:
+        - parameters
+      x-examples:
+        Example 1:
+          type: header
+          format: document
+          parameters:
+            - type: document
+              document:
+                link: 'https://cdn.chatapi.net'
+                caption: document caption
+                filename: document.pdf
+    MTMBody:
+      type: object
+      title: MTMBody
+      properties:
+        type:
+          type: string
+          enum:
+            - body
+          example: body
+        text:
+          type: string
+          example: "Good news! \U0001F600 We have fixed the bug that you reported, Please run some tests and let us know how it worked."
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - text
+                example: text
+              text:
+                type: string
+                example: Parameter 1
+    MTMFooter:
+      type: object
+      title: MTMFooter
+      properties:
+        type:
+          type: string
+          enum:
+            - footer
+          example: footer
+        text:
+          type: string
+          example: This is a footer text
+    MTMButton:
+      type: object
+      title: MTMButton
+      properties:
+        type:
+          type: string
+          enum:
+            - buttons
+          example: buttons
+        buttons:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/MTMButtonQuickReply'
+              - $ref: '#/components/schemas/MTMButtonPhoneNumber'
+              - $ref: '#/components/schemas/MTMButtonURL'
+    MTMButtonQuickReply:
+      type: object
+      title: MTMButtonQuickReply
+      properties:
+        type:
+          type: string
+          enum:
+            - quick_reply
+          example: quick_reply
+        text:
+          type: string
+          example: 'No'
+    MTMButtonPhoneNumber:
+      type: object
+      title: MTMButtonPhoneNumber
+      properties:
+        type:
+          type: string
+          enum:
+            - phone_number
+          example: phone_number
+        text:
+          type: string
+          example: Customer Care
+        phone_number:
+          type: string
+          example: '+60376268899'
+    MTMButtonURL:
+      type: object
+      title: MTMButtonURL
+      properties:
+        type:
+          type: string
+          example: url
+        text:
+          type: string
+          example: Track Your Parcel
+        url:
+          type: string
+          example: 'https://www.trackparcel.com/'
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - text
+                example: text
+              text:
+                type: string
+                example: button_parameter_text
+    Email:
+      type: object
+      title: Email
+      properties:
+        type:
+          type: string
+          example: email
+        text:
+          type: string
+          example: Example email text
+        subject:
+          type: string
+          example: Example email subject
+        bcc:
+          type: array
+          uniqueItems: true
+          example:
+            - test@example.com
+        cc:
+          type: array
+          uniqueItems: true
+          example:
+            - test@example.com
+        replyToMessageId:
+          type: integer
+          example: 1262965213
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - image
+                  - video
+                  - audio
+                  - file
+                example: image
+              url:
+                type: string
+                example: 'https://cdn.respond.io/johndoe.png'
+              fileName:
+                type: string
+                example: filename.png
+            required:
+              - type
+              - url
+              - fileName
+      required:
+        - type
+    MessageStatus:
+      type: array
+      title: MessageStatus
+      description: The delivery statuses of the message
+      anyOf:
+        - type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                enum:
+                  - pending
+                  - sent
+                  - delivered
+                  - read
+                  - failed
+              timestamp:
+                type: integer
+                description: Unix timestamp in seconds
+                example: 1662965213
+              message:
+                type: string
+                description: Reason of the failure.
+                example: Failed reason
+            required:
+              - value
+              - timestamp
+security:
+  - BearerAuth: []

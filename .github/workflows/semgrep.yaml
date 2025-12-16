@@ -54,3 +54,32 @@ jobs:
             misconfiguration/
             default-logins/
           output: nuclei-results.json
+
+  zap-scan:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        api:
+          - file: 'specs/comment-api.yml'
+            name: 'Comment API'
+          - file: 'specs/contact-api.yaml'
+            name: 'Contact API'
+          - file: 'specs/conversation-api.yaml'
+            name: 'Conversation API'
+          - file: 'specs/messaging-api.yaml'
+            name: 'Messaging API'
+          - file: 'specs/space-api.yaml'
+            name: 'Space API'
+      fail-fast: false
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: ZAP Scan - ${{ matrix.api.name }}
+        uses: zaproxy/action-api-scan@v0.7.0
+        with:
+          target: 'https://api.respond.io/v2'
+          format: openapi
+          apifile: ${{ matrix.api.file }}
+          #rules_file: 'zap-rules.conf'
+          #cmd_options: '-I'

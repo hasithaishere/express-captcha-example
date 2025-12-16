@@ -1,0 +1,1168 @@
+openapi: 3.0.0
+info:
+  version: '2.0'
+  title: Space
+  description: |
+    Utilize the Space API suite to streamline various actions within your workspace. You can easily retrieve lists of users, access specific user profiles, create custom fields, and list existing custom fields. Furthermore, you can retrieve specific customer field details, list of closing notes, available channels, and message templates.
+  termsOfService: 'https://respond.io/terms-of-service'
+  contact:
+    name: respond.io
+    url: 'https://respond.io/contact'
+  license:
+    name: ''
+servers:
+  - url: 'https://api.respond.io/v2'
+paths:
+  /space/user:
+    get:
+      summary: List users
+      description: |-
+        Get a list of users in your workspace.
+
+        Users with pending invitations are not included in the response.
+      operationId: listSpaces
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursorId'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SpaceUser'
+                  pagination:
+                    type: object
+                    properties:
+                      next:
+                        type: string
+                        example: 'https://api.respond.io/space/user?limit=10&cursorId=10'
+                      previous:
+                        type: string
+                        example: 'https://api.respond.io/space/user?limit=10&cursorId=-10'
+                    required:
+                      - next
+                      - previous
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  '/space/user/{id}':
+    get:
+      summary: Get a user
+      description: Retrieve information about a user.
+      operationId: getUser
+      parameters:
+        - name: id
+          in: path
+          description: User ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceUser'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  /space/custom_field:
+    post:
+      summary: Create custom field
+      description: Create a new custom field
+      operationId: createCustomField
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 50
+                  example: customer id
+                slug:
+                  type: string
+                  nullable: true
+                  description: 'The unique identifier for API and integrations. Field ID cannot be edited once added. Only letters, numbers, and underscores are allowed for this field.'
+                  maxLength: 50
+                  example: customer_id
+                description:
+                  type: string
+                  maxLength: 255
+                  example: This is for storing customer ID
+                dataType:
+                  type: string
+                  enum:
+                    - text
+                    - list
+                    - checkbox
+                    - email
+                    - number
+                    - url
+                    - date
+                    - time
+                  example: number
+                allowedValues:
+                  type: array
+                  nullable: true
+                  description: Only to be provided when the value of `dataType` is `list`
+                  items:
+                    type: string
+              required:
+                - name
+                - dataType
+            examples:
+              Text:
+                value:
+                  name: notes
+                  description: The internal notes about this customer
+                  dataType: text
+              List:
+                value:
+                  name: Fruits
+                  description: The type of fruits we have
+                  dataType: list
+                  allowedValues:
+                    - Apple
+                    - Banana
+                    - Mango
+              Number:
+                value:
+                  name: Order Number
+                  description: The order number of customer
+                  dataType: number
+              Checkbox:
+                value:
+                  name: New Customer
+                  description: A flag to see if its a new customer.
+                  dataType: checkbox
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactField'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+    get:
+      summary: List custom fields
+      description: 'Get a list of all the custom fields in the workspace. '
+      operationId: listContactFields
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursorId'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContactField'
+                  pagination:
+                    type: object
+                    properties:
+                      next:
+                        type: string
+                        example: 'https://api.respond.io/space/contact_field?limit=10&cursorId=10'
+                      previous:
+                        type: string
+                        example: 'https://api.respond.io/space/contact_field?limit=10&cursorId=-10'
+                    required:
+                      - next
+                      - previous
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  '/space/custom_field/{id}':
+    get:
+      summary: Get a custom field
+      description: |-
+        Get more information about a custom field.
+
+        You would need to provide the unique custom field ID.
+      operationId: getContactField
+      parameters:
+        - name: id
+          in: path
+          description: ID of the contact field
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactField'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  /space/closing_notes:
+    get:
+      summary: List Closing Notes
+      description: |-
+        Get a list of all the closing notes in the workspace.
+
+        The response is sorted by category.
+      operationId: listClosingNotes
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursorId'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ClosingNote'
+                  pagination:
+                    type: object
+                    properties:
+                      next:
+                        type: string
+                        example: 'https://api.respond.io/space/closing_notes?limit=10&cursorId=10'
+                      previous:
+                        type: string
+                        example: 'https://api.respond.io/space/closing_notes?limit=10&cursorId=-10'
+                    required:
+                      - next
+                      - previous
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  /space/channel:
+    get:
+      summary: List channels
+      description: Get all the messaging channels connected in the workspace.
+      operationId: listChannels
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursorId'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SpaceChannel'
+                  pagination:
+                    type: object
+                    properties:
+                      next:
+                        type: string
+                        example: 'https://api.respond.io/space/channel?limit=10&cursorId=10'
+                      previous:
+                        type: string
+                        example: 'https://api.respond.io/space/channellimit=10&cursorId=-10'
+                    required:
+                      - next
+                      - previous
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  '/space/channel/{id}/template':
+    get:
+      summary: List message templates
+      description: Get all the message template of a connected channels in the workspace.
+      operationId: listChannels
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - name: cursorId
+          in: query
+          description: Pointer to the template `id` from where the next batch of records should start from.
+          schema:
+            type: integer
+        - name: id
+          in: path
+          description: ID of the channel to list template
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WhatsAppTemplate'
+                  pagination:
+                    type: object
+                    properties:
+                      next:
+                        type: string
+                        example: 'https://api.respond.io/space/channel/{id}/template?limit=10&cursorId=10'
+                      previous:
+                        type: string
+                        example: 'https://api.respond.io/space/channel/{id}/template?limit=10&cursorId=-10'
+                    required:
+                      - next
+                      - previous
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+  /space/tag:
+    post:
+      summary: Create Space Tag
+      description: |
+        Create Tags for the Workspace.
+      operationId: post-space-tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                colorCode:
+                  type: string
+                emoji:
+                  type: string
+              required:
+                - name
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceTag'
+        '401':
+          $ref: '#/components/responses/401'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+    put:
+      summary: Update Space Tag
+      description: |
+        Update Tag's Tag Name, Description, Emoji, and Color.
+      operationId: put-space-tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentName:
+                  type: string
+                name:
+                  type: string
+                description:
+                  type: string
+                colorCode:
+                  type: string
+                emoji:
+                  type: string
+              required:
+                - currentName
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceTag'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+    delete:
+      summary: Delete Space Tag
+      description: Delete Tags from the Workspace.
+      operationId: delete-space-tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+                - name
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Tag deleted successfully
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+components:
+  parameters:
+    limit:
+      name: limit
+      in: query
+      description: Number of items to return i.e. page size.
+      required: false
+      allowEmptyValue: true
+      schema:
+        type: integer
+        minimum: 1
+        exclusiveMaximum: true
+        maximum: 100
+        default: 10
+    cursorId:
+      name: cursorId
+      in: query
+      description: Pointer to the contact `id` from where the next batch of records should start from.
+      required: false
+      schema:
+        type: integer
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  responses:
+    '400':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 400
+              message:
+                type: string
+                example: Validation error.
+    '401':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 401
+              message:
+                type: string
+                example: UN_AUTHORIZED
+    '404':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: Contact not found
+    '409':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+              message:
+                type: string
+    '429':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 429
+              message:
+                type: string
+                example: Too Many Requests
+      headers:
+        Retry-After:
+          schema:
+            type: number
+            example: 1
+          description: Number of seconds until you can retry the request
+        X-RateLimit-Limit:
+          schema:
+            type: number
+            example: 10
+          description: Number of request allowed for this end point
+        X-RateLimit-Remaining:
+          schema:
+            type: number
+            example: 5
+          description: Number of request remaining for this end point
+    '500':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 500
+              message:
+                type: string
+                example: Unexpected error occurred
+  schemas:
+    SpaceUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User ID.
+          example: 123
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Wick
+        email:
+          type: string
+          example: test@example.com
+        role:
+          type: string
+          enum:
+            - agent
+            - manager
+            - owner
+          description: User **role** in the workspace.
+          example: owner
+        team:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+              description: ID of the team.
+              example: 123
+            name:
+              type: string
+              description: Name of the team.
+              example: Customer Support
+        restrictions:
+          type: array
+          description: Constants representing the user restrictions at the workspace-level.
+          anyOf:
+            - type: array
+              uniqueItems: true
+              items:
+                type: string
+                enum:
+                  - restrict_data_export
+                  - restrict_contact_deletion
+                  - restrict_space_setting
+                  - show_team_contacts
+                  - show_only_mine
+                  - restrict_space_integration
+                  - restrict_shortcuts
+                example: show_only_mine
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - role
+        - team
+        - restrictions
+    ContactField:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Custom field ID.
+          example: 123
+        name:
+          type: string
+          description: Name of the custom field.
+          example: customer_id
+        description:
+          type: string
+          example: Customer ID
+        dataType:
+          type: string
+          enum:
+            - text
+            - list
+            - checkbox
+            - email
+            - number
+            - url
+            - date
+            - time
+          description: Type of the data stored in this custom field.
+          example: number
+        allowedValues:
+          type: array
+          description: List of enum values allowed to be stored in this field. This property is applicable only if the `dataType` is `list`.
+          items:
+            type: string
+      required:
+        - id
+        - name
+        - description
+        - dataType
+    ClosingNote:
+      type: object
+      properties:
+        category:
+          type: string
+          description: The name of category you have created.
+          example: Order Issue
+        description:
+          type: string
+          example: Conversation dealt with issues related to a specific order.
+      required:
+        - category
+    SpaceChannel:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 12345
+        name:
+          type: string
+          description: Channel name
+        source:
+          type: string
+          enum:
+            - facebook
+            - instagram
+            - line
+            - telegram
+            - viber
+            - twitter
+            - wechat
+            - custom_channel
+            - gmail
+            - other_email
+            - twilio
+            - message_bird
+            - nexmo
+            - 360dialog_whatsapp
+            - twilio_whatsapp
+            - message_bird_whatsapp
+            - whatsapp
+            - nexmo_whatsapp
+            - whatsapp_cloud
+          description: Type of the channel
+        created_at:
+          type: integer
+          description: Unix timestamp of the channel creation time (in seconds).
+      required:
+        - id
+        - name
+        - source
+        - created_at
+    WhatsAppTemplate:
+      type: object
+      title: MessageTemplate
+      properties:
+        id:
+          type: integer
+          example: 12345
+        name:
+          type: string
+          example: conversation_follow_up
+        components:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/MTMHeader'
+              - $ref: '#/components/schemas/MTMFooter'
+              - $ref: '#/components/schemas/MTMButton'
+              - $ref: '#/components/schemas/MTMBody'
+        bundle:
+          type: object
+        channelId:
+          type: integer
+          example: 1234
+        botId:
+          type: integer
+          example: 123
+        languageCode:
+          type: string
+          description: '[Follows ISO 639-1 standard](https://developers.facebook.com/docs/whatsapp/api/messages/message-templates/#supported-languages)'
+          example: en
+        namespace:
+          type: string
+          default: null
+        category:
+          type: string
+          example: MARKETING
+        status:
+          type: string
+          example: approved
+        statusDetail:
+          type: string
+      required:
+        - name
+        - components
+        - channelId
+        - botId
+        - languageCode
+        - category
+    MTMHeader:
+      type: object
+      anyOf:
+        - $ref: '#/components/schemas/MTMHeaderText'
+        - $ref: '#/components/schemas/MTMHeaderImage'
+        - $ref: '#/components/schemas/MTMHeaderVideo'
+        - $ref: '#/components/schemas/MTMHeaderDocument'
+    MTMHeaderText:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - header
+          example: header
+        format:
+          type: string
+          enum:
+            - text
+          example: text
+        text:
+          type: string
+          example: Header text
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: text
+              text:
+                type: string
+                example: respond.io
+            required:
+              - type
+              - text
+      required:
+        - type
+        - text
+        - parameters
+    MTMHeaderImage:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - header
+          example: header
+        format:
+          type: string
+          enum:
+            - image
+          example: image
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - image
+                example: image
+              image:
+                type: object
+                properties:
+                  link:
+                    type: string
+                    example: 'https://picsum.photos'
+                  caption:
+                    type: string
+                    example: image caption
+                  filename:
+                    type: string
+                    example: image_1024x768.png
+                required:
+                  - link
+                  - caption
+                  - filename
+            required:
+              - type
+              - image
+      required:
+        - parameters
+      x-examples:
+        Example 1:
+          type: header
+          format: image
+          parameters:
+            - type: image
+              image:
+                link: 'https://cdn.chatapi.net'
+                caption: image caption
+                filename: image_1024x768.png
+    MTMHeaderVideo:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - header
+          example: header
+        format:
+          type: string
+          enum:
+            - video
+          example: video
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - video
+                format: video
+                example: video
+              video:
+                type: object
+                properties:
+                  link:
+                    type: string
+                    example: 'https://cdn.chatapi.net'
+                  caption:
+                    type: string
+                    example: video caption
+                  filename:
+                    type: string
+                    example: video.mp4
+                required:
+                  - link
+                  - caption
+                  - filename
+            required:
+              - type
+              - video
+      required:
+        - parameters
+      x-examples:
+        Example 1:
+          type: header
+          format: video
+          parameters:
+            - type: video
+              video:
+                link: 'https://cdn.chatapi.net'
+                caption: video caption
+                filename: video.mp4
+    MTMHeaderDocument:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - header
+          example: header
+        format:
+          type: string
+          enum:
+            - document
+          example: document
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - document
+                example: document
+              document:
+                type: object
+                properties:
+                  link:
+                    type: string
+                    format: url
+                    example: 'https://cdn.chatapi.net'
+                  caption:
+                    type: string
+                    example: document caption
+                  filename:
+                    type: string
+                    example: document.pdf
+                required:
+                  - link
+                  - filename
+            required:
+              - type
+              - document
+      required:
+        - parameters
+      x-examples:
+        Example 1:
+          type: header
+          format: document
+          parameters:
+            - type: document
+              document:
+                link: 'https://cdn.chatapi.net'
+                caption: document caption
+                filename: document.pdf
+    MTMFooter:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - footer
+          example: footer
+        text:
+          type: string
+          example: This is a footer text
+    MTMButton:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - buttons
+          example: buttons
+        buttons:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/MTMButtonQuickReply'
+              - $ref: '#/components/schemas/MTMButtonPhoneNumber'
+              - $ref: '#/components/schemas/MTMButtonURL'
+    MTMButtonQuickReply:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - quick_reply
+          example: quick_reply
+        text:
+          type: string
+          example: 'No'
+    MTMButtonPhoneNumber:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - phone_number
+          example: phone_number
+        text:
+          type: string
+          example: Customer Care
+        phone_number:
+          type: string
+          example: '+60376268899'
+    MTMButtonURL:
+      type: object
+      properties:
+        type:
+          type: string
+          example: url
+        text:
+          type: string
+          example: Track Your Parcel
+        url:
+          type: string
+          example: 'https://www.trackparcel.com/'
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - text
+                example: text
+              text:
+                type: string
+                example: button_parameter_text
+    MTMBody:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - body
+          example: body
+        text:
+          type: string
+          example: "Good news! \U0001F600 We have fixed the bug that you reported, Please run some tests and let us know how it worked."
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - text
+                example: text
+              text:
+                type: string
+                example: Parameter 1
+    SpaceTag:
+      type: object
+      title: SpaceTag
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        emoji:
+          type: string
+        colorCode:
+          type: string
+security:
+  - BearerAuth: []

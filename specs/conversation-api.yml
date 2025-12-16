@@ -1,0 +1,250 @@
+openapi: 3.0.0
+info:
+  version: '2.0'
+  title: Conversation
+  description: |-
+    Utilize the Conversation API suite to effortlessly open and close conversations for your contacts, as well as assign and unassign users to them.
+    <!-- theme: info -->
+    > You can retrieve the Conversation status of a Contact in the Get a Contact endpoint [here](https://respond.stoplight.io/docs/api/cbcfb23486778-get-a-contact).
+  license:
+    name: MIT
+servers:
+  - url: 'https://api.respond.io/v2'
+    description: Production
+paths:
+  '/contact/{identifier}/conversation/assignee':
+    post:
+      summary: Assign/unassign conversation
+      description: Updates the assignee of a specific contact. You can unassign the contact by leaving the assignee value empty.
+      operationId: updateAssignee
+      parameters:
+        - $ref: '#/components/parameters/identifier'
+        - $ref: '#/components/parameters/identifier'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assignee:
+                  type: string
+                  enum:
+                    - 'null'
+                    - User ID
+                    - User Email
+                  description: |-
+                    `user ID` or `email` of the assignee user.
+
+                    Provide `null` to unassign the contact.
+                  example: test@example.com
+              required:
+                - assignee
+            examples:
+              Unassign conversation:
+                value:
+                  assignee: null
+              Assign Conversation by user Id:
+                value:
+                  assignee: 1
+              Assign Conversation by email:
+                value:
+                  assignee: abc@gmail.com
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '449':
+          $ref: '#/components/responses/449'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+          description: Production
+  '/contact/{identifier}/conversation/status':
+    post:
+      summary: Open/close conversation
+      description: Update the conversation status to open or close. You can provide the conversation category and summary in the API call along when update the conversation status to close.
+      operationId: updateConversationStatus
+      parameters:
+        - $ref: '#/components/parameters/identifier'
+        - $ref: '#/components/parameters/identifier'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - open
+                    - close
+                  description: Status of the conversation which can either be `open` or `close`
+                category:
+                  type: string
+                  description: Optionally provide the **closing note** name.
+                  maxLength: 128
+                summary:
+                  type: string
+                  description: Optionally provide a **summary**. Only used if the `category` is specified.
+                  maxLength: 512
+              required:
+                - status
+            examples:
+              Open:
+                value:
+                  status: open
+              Close:
+                value:
+                  status: close
+                  category: Spam
+                  summary: This contact is a bot
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '449':
+          $ref: '#/components/responses/449'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - BearerAuth: []
+      servers:
+        - url: 'https://api.respond.io/v2'
+          description: Production
+components:
+  parameters:
+    identifier:
+      name: identifier
+      in: path
+      description: 'Identifier of the contact that can either be a phone number, email or contact ID. Examples: ``id:123`` , ``email:abdc@gmail.com`` , ``phone:+60121233112``'
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  responses:
+    '200':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              contactId:
+                type: integer
+                description: ID of the contact on which the action was performed.
+    '400':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 400
+              message:
+                type: string
+                example: Validation error.
+    '401':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 401
+              message:
+                type: string
+                example: UN_AUTHORIZED
+    '404':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: Contact not found
+    '429':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 429
+              message:
+                type: string
+                example: Too Many Requests
+      headers:
+        Retry-After:
+          schema:
+            type: number
+            example: 1
+          description: Number of seconds until you can retry the request
+        X-RateLimit-Limit:
+          schema:
+            type: number
+            example: 10
+          description: Number of request allowed for this end point
+        X-RateLimit-Remaining:
+          schema:
+            type: number
+            example: 5
+          description: Number of request remaining for this end point
+    '449':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 449
+              message:
+                type: string
+                example: Your request cannot be processed at the moment as it is currently in queue. Please try again in a few minutes.
+    '500':
+      description: ''
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                example: 500
+              message:
+                type: string
+                example: Unexpected error occurred
+security:
+  - BearerAuth: []
