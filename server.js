@@ -91,6 +91,28 @@ app.post('/submit', async (req, res) => {
     }
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok' });
+});
+
+// Get client IP address
+app.get('/ip', (req, res) => {
+    res.json({ ip: req.ip });
+});
+
+// Get client IP address info
+app.get('/ipinfo', async (req, res) => {
+    try {
+        const ip = req.ip;
+        const response = await axios.get(`https://ipinfo.io/${ip}/json`);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching IP info:', error);
+        res.status(500).json({ error: 'Error fetching IP info' });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
