@@ -91,6 +91,75 @@ app.post('/submit', async (req, res) => {
     }
 });
 
+/**
+ * @api {get} /health Health Check
+ * @apiName GetHealth
+ * @apiGroup Server
+ *
+ * @apiSuccess {String} status Status of the server.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "status": "ok"
+ *     }
+ */
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok' });
+});
+
+/**
+ * @api {get} /ip Get Client IP
+ * @apiName GetIp
+ * @apiGroup Server
+ *
+ * @apiSuccess {String} ip The client's IP address.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "ip": "::1"
+ *     }
+ */
+app.get('/ip', (req, res) => {
+    res.json({ ip: req.ip });
+});
+
+/**
+ * @api {get} /ipinfo Get Client IP Info
+ * @apiName GetIpInfo
+ * @apiGroup Server
+ *
+ * @apiSuccess {Object} data Information about the client's IP address from ipinfo.io.
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "ip": "8.8.8.8",
+ *       "hostname": "dns.google",
+ *       "city": "Mountain View",
+ *       "region": "California",
+ *       "country": "US",
+ *       "loc": "37.4056,-122.0775",
+ *       "org": "AS15169 Google LLC",
+ *       "postal": "94043",
+ *       "timezone": "America/Los_Angeles"
+ *     }
+ * @apiError {String} error Error message.
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 500 Internal Server Error
+ *     {
+ *       "error": "Error fetching IP info"
+ *     }
+ */
+app.get('/ipinfo', async (req, res) => {
+    try {
+        const ip = req.ip;
+        const response = await axios.get(`https://ipinfo.io/${ip}/json`);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching IP info:', error);
+        res.status(500).json({ error: 'Error fetching IP info' });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
