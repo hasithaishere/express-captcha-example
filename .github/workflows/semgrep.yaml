@@ -36,3 +36,21 @@ jobs:
           name: semgrep-results
           path: semgrep-results.json
           if-no-files-found: warn
+
+  dast_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Nuclei Vulnerability Scan
+        uses: projectdiscovery/nuclei-action@main
+        with:
+          target: https://staging.respond.io/api/
+          templates: |
+            cves/
+            vulnerabilities/
+            exposures/
+            misconfiguration/
+            default-logins/
+          output: nuclei-results.json
