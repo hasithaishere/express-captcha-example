@@ -57,6 +57,10 @@ jobs:
 
   zap-scan:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write  # Required if you want ZAP to create GitHub issues
+    
     strategy:
       matrix:
         api:
@@ -80,6 +84,18 @@ jobs:
         with:
           target: 'https://api.respond.io/v2'
           format: openapi
-          apifile: ${{ matrix.api.file }}
-          #rules_file: 'zap-rules.conf'
-          #cmd_options: '-I'
+          cmd_options: '-d ${{ matrix.api.file }}'
+          # rules_file_name: 'zap-rules.conf'  # Uncomment if you create a rules file
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fail_action: false  # Set to true if you want the workflow to fail on security findings
+          artifact_name: 'zap-scan-${{ matrix.api.name }}'
+      
+      - name: Upload ZAP Report - ${{ matrix.api.name }}
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-report-${{ matrix.api.name }}
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
