@@ -65,15 +65,15 @@ jobs:
       matrix:
         api:
           - file: 'specs/comment-api.yml'
-            name: 'Comment API'
+            name: 'comment-api'
           - file: 'specs/contact-api.yaml'
-            name: 'Contact API'
+            name: 'contact-api'
           - file: 'specs/conversation-api.yaml'
-            name: 'Conversation API'
+            name: 'conversation-api'
           - file: 'specs/messaging-api.yaml'
-            name: 'Messaging API'
+            name: 'messaging-api'
           - file: 'specs/space-api.yaml'
-            name: 'Space API'
+            name: 'space-api'
       fail-fast: false
     
     steps:
